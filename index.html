@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d5c63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Transplant Navigator · Dubai Health</title>
+<meta name="description" content="Personalized kidney transplant journey app for patients, physicians, clinical pharmacists and coordinators. Dubai Health (SALAMA / NABIDH) — clearances, waitlist, kidney offer, surgery and lifelong post-transplant care. Educational prototype.">
+<meta property="og:title" content="Transplant Navigator · Dubai Health">
+<meta property="og:description" content="One app for the whole kidney transplant journey — patient, physician, pharmacist and coordinator views, medication schedules and a transplant drug-interaction checker.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon-512.png">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<style>
+  :root{
+    --teal:#0d5c63;--teal-d:#073b40;--teal-l:#13868f;--mint:#e6f4f1;
+    --sky:#2a7de1;--amber:#e8a33d;--rose:#d6455d;--green:#2f9e6f;--purple:#7b4fb5;
+    --ink:#13242b;--slate:#5b6b73;--line:#dde7e7;--bg:#f4f8f8;--card:#fff;
+    --pt:#2a7de1;--md:#7b4fb5;--rx:#0f9d8f;--co:#e8702a;
+    --shadow:0 2px 14px rgba(13,92,99,.10);--radius:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .shell{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;box-shadow:0 0 60px rgba(0,0,0,.12)}
+  @media(min-width:520px){body{padding:24px 0;background:#dbe7e7}.shell{min-height:calc(100vh - 48px);border-radius:34px;border:10px solid #0c2b2e;overflow:hidden}}
+
+  header{background:linear-gradient(135deg,var(--teal),var(--teal-l));color:#fff;padding:14px 16px 12px;position:sticky;top:0;z-index:30}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:18px}
+  .brand h1{font-size:15px;margin:0;font-weight:700}
+  .brand p{margin:0;font-size:10.5px;opacity:.85;font-weight:500}
+  .hbtns{display:flex;gap:6px;margin-left:auto;align-items:center}
+  .icon-btn{background:rgba(255,255,255,.16);border:none;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:600;color:#fff;display:flex;align-items:center;gap:5px;cursor:pointer}
+  .icon-btn:active{transform:scale(.96)}
+  .sync{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:10.5px;background:rgba(0,0,0,.14);padding:6px 11px;border-radius:18px;font-weight:600}
+  .sync .d{width:7px;height:7px;border-radius:50%;background:#7ff0c0;box-shadow:0 0 0 3px rgba(127,240,192,.3)}
+
+  main{padding:14px 14px 92px}
+  .screen{display:none;animation:fade .3s}.screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* login */
+  #login{padding:0}
+  .login-hero{background:linear-gradient(150deg,var(--teal),var(--teal-d));color:#fff;padding:46px 24px 30px;text-align:center}
+  .login-hero .lg{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:34px;margin:0 auto 14px}
+  .login-hero h2{margin:0 0 6px;font-size:22px}
+  .login-hero p{margin:0;font-size:13px;opacity:.9}
+  .login-body{padding:22px 18px}
+  .login-body h3{font-size:14px;margin:0 0 4px}
+  .login-body .hint{font-size:12px;color:var(--slate);margin:0 0 14px}
+  .role-pick{display:flex;align-items:center;gap:13px;width:100%;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;margin-bottom:10px;text-align:left}
+  .role-pick:active{transform:scale(.99)}
+  .role-pick .av{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:21px;color:#fff;flex-shrink:0}
+  .role-pick .t{font-size:14px;font-weight:700}.role-pick .s{font-size:11.5px;color:var(--slate)}
+  .role-pick .arrow{margin-left:auto;color:var(--line);font-size:20px}
+  .platforms{display:flex;justify-content:center;gap:18px;margin-top:18px;color:var(--slate);font-size:11px;font-weight:600}
+  .platforms span{display:flex;flex-direction:column;align-items:center;gap:3px}.platforms .pi{font-size:18px}
+
+  .roles{display:flex;gap:5px;margin-top:11px;background:rgba(0,0,0,.14);padding:4px;border-radius:13px}
+  .role{flex:1;text-align:center;padding:7px 3px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.78);border:none;background:transparent}
+  .role .ri{display:block;font-size:15px;margin-bottom:1px}
+  .role.active{background:#fff;color:var(--teal-d);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+
+  .phasebar{background:var(--card);border-radius:var(--radius);padding:13px 14px;box-shadow:var(--shadow);margin-bottom:13px}
+  .phasebar h2{margin:0 0 3px;font-size:15px}.phasebar .sub{font-size:11.5px;color:var(--slate);margin-bottom:10px}
+  .ptrack{display:flex;gap:4px}
+  .ptrack .seg{flex:1;height:6px;border-radius:4px;background:var(--line);position:relative}
+  .ptrack .seg.on{background:linear-gradient(90deg,var(--teal),var(--green))}
+  .ptrack .seg.cur{background:var(--amber)}
+  .plabels{display:flex;gap:4px;margin-top:6px}
+  .plabels span{flex:1;font-size:8.5px;text-align:center;color:var(--slate);font-weight:600}
+  .plabels span.on{color:var(--teal)}
+
+  .card{background:var(--card);border-radius:var(--radius);padding:15px;box-shadow:var(--shadow);margin-bottom:13px}
+  .card h3{margin:0 0 4px;font-size:14.5px}.card .hint{font-size:11.5px;color:var(--slate);margin:0 0 10px}
+  .sec-h{font-size:13px;font-weight:700;color:var(--teal-d);margin:14px 2px 9px;display:flex;align-items:center;gap:7px}
+  .sec-h .pill{margin-left:auto;font-size:10px;background:var(--mint);color:var(--teal-d);padding:2px 9px;border-radius:11px;font-weight:700}
+
+  /* clearance */
+  .prog-ring{display:flex;align-items:center;gap:14px;margin-bottom:4px}
+  .ring{--p:0;width:62px;height:62px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--green) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center}
+  .ring i{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:15px;font-weight:800;color:var(--teal-d);font-style:normal}
+  .clr{display:flex;align-items:center;gap:11px;background:var(--card);border-radius:12px;padding:11px 12px;box-shadow:var(--shadow);margin-bottom:8px;border-left:4px solid var(--line)}
+  .clr.s-cleared{border-left-color:var(--green)} .clr.s-in_progress{border-left-color:var(--sky)} .clr.s-scheduled{border-left-color:var(--amber)} .clr.s-action{border-left-color:var(--rose)} .clr.s-pending{border-left-color:var(--line)}
+  .clr .ic{width:34px;height:34px;border-radius:9px;background:var(--mint);display:grid;place-items:center;font-size:17px;flex-shrink:0}
+  .clr .nm{font-size:13px;font-weight:700}.clr .dt{font-size:11px;color:var(--slate)}
+  .clr .st{margin-left:auto;font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:11px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+  .st.s-cleared{background:#e3f5ec;color:var(--green)} .st.s-in_progress{background:#e7f0fd;color:var(--sky)} .st.s-scheduled{background:#fbf0dc;color:var(--amber)} .st.s-action{background:#fbe7eb;color:var(--rose)} .st.s-pending{background:#eef2f2;color:var(--slate)}
+
+  /* waitlist gauge */
+  .wl-card{background:linear-gradient(135deg,#0d5c63,#13868f);color:#fff;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:13px;text-align:center}
+  .wl-status{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.16);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:14px}
+  .wl-status .d{width:8px;height:8px;border-radius:50%;background:#7ff0c0;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .wl-big{font-size:30px;font-weight:800;line-height:1.1}
+  .wl-sub{font-size:12px;opacity:.9;margin-top:3px}
+  .wl-stats{display:flex;gap:10px;margin-top:16px}
+  .wl-stats .s{flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px}
+  .wl-stats .n{font-size:18px;font-weight:800}.wl-stats .l{font-size:9.5px;opacity:.85;margin-top:2px}
+  .wl-note{font-size:11px;opacity:.92;margin-top:14px;line-height:1.45}
+
+  /* offer / retrieval stepper */
+  .offer-banner{background:linear-gradient(135deg,#d6455d,#b5314a);color:#fff;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:13px;text-align:center}
+  .offer-banner .big{font-size:30px;margin-bottom:4px}
+  .offer-banner h3{margin:0 0 5px;font-size:17px}
+  .offer-banner p{margin:0;font-size:12px;opacity:.95}
+  .stepper{position:relative;padding-left:8px}
+  .step{position:relative;padding:0 0 4px 26px;margin-bottom:10px}
+  .step::before{content:"";position:absolute;left:5px;top:20px;bottom:-10px;width:2px;background:var(--line)}
+  .step:last-child::before{display:none}
+  .step .dot{position:absolute;left:0;top:3px;width:12px;height:12px;border-radius:50%;background:#fff;border:2.5px solid var(--line);z-index:1}
+  .step.done .dot{background:var(--green);border-color:var(--green)}
+  .step.cur .dot{background:var(--amber);border-color:var(--amber);box-shadow:0 0 0 4px #fbf0dc}
+  .step .box{background:var(--card);border-radius:12px;padding:11px 13px;box-shadow:var(--shadow)}
+  .step.cur .box{border:1.5px solid var(--amber)}
+  .step .t{font-size:13px;font-weight:700}.step .d{font-size:11.5px;color:var(--slate);margin-top:2px}
+  .step .liveb{font-size:9px;font-weight:800;color:#fff;background:var(--amber);padding:2px 7px;border-radius:9px;margin-left:6px;text-transform:uppercase}
+  .dgf-card{border-left:4px solid var(--amber);background:#fffaf0}
+
+  /* care items / today */
+  .stat-row{display:flex;gap:9px;margin-bottom:13px}
+  .stat{flex:1;background:var(--card);border-radius:13px;padding:11px;box-shadow:var(--shadow);text-align:center}
+  .stat .n{font-size:19px;font-weight:800;color:var(--teal)}.stat .l{font-size:9.5px;color:var(--slate);font-weight:600;margin-top:2px}
+  .ci{background:var(--card);border-radius:12px;padding:11px 13px;box-shadow:var(--shadow);margin-bottom:9px;border-left:4px solid var(--md)}
+  .ci.t-instruction{border-left-color:var(--rose)}.ci.t-recommendation{border-left-color:var(--md)}.ci.t-result{border-left-color:var(--sky)}.ci.t-reminder{border-left-color:var(--amber)}
+  .ci .h{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+  .ci .ty{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:8px}
+  .t-instruction .ty{background:#fbe7eb;color:var(--rose)}.t-recommendation .ty{background:#f0e9fa;color:var(--md)}.t-result .ty{background:#e7f0fd;color:var(--sky)}.t-reminder .ty{background:#fbf0dc;color:var(--amber)}
+  .ci .fr{font-size:9.5px;color:var(--slate);margin-left:auto}
+  .ci .tt{font-size:13px;font-weight:700}.ci .tx{font-size:12px;color:#37474f;margin-top:2px}
+  .ci .ack{font-size:9.5px;color:var(--green);font-weight:700;margin-top:5px}
+  .task{display:flex;gap:10px;background:var(--card);border-radius:12px;padding:11px 12px;box-shadow:var(--shadow);margin-bottom:8px}
+  .task .ck{width:20px;height:20px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:12px;margin-top:1px}
+  .task.done .ck{background:var(--green);border-color:var(--green)}.task.done .tx{text-decoration:line-through;color:var(--slate)}
+  .task .tx{font-size:12.5px;font-weight:600}.task .mt{font-size:10.5px;color:var(--slate)}
+
+  /* meds / data */
+  .med{background:var(--card);border-radius:12px;padding:11px 13px;box-shadow:var(--shadow);margin-bottom:9px;border-left:4px solid var(--rx)}
+  .med .mn{font-size:13px;font-weight:700}.med .mc{font-size:11px;color:var(--slate)}
+  .med .tg{font-size:10.5px;font-weight:700;color:var(--rx);background:#e2f6f3;padding:2px 8px;border-radius:8px;display:inline-block;margin-top:6px}
+  .med .sched{font-size:11px;color:var(--slate);margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .med .sched .t{background:#eef4f4;color:var(--teal-d);padding:2px 8px;border-radius:8px;font-weight:700}
+  .med .ixb{font-size:8.5px;font-weight:800;padding:2px 7px;border-radius:8px;text-transform:uppercase;margin-left:7px;vertical-align:middle}
+  .med .ixb.sev-contra{background:#b5314a;color:#fff} .med .ixb.sev-major{background:#fbe7eb;color:var(--rose)} .med .ixb.sev-moderate{background:#fbf0dc;color:var(--amber)} .med .ixb.sev-minor{background:#e3f5ec;color:var(--green)}
+  .tl-time{display:flex;gap:10px;margin-bottom:8px}
+  .tl-time .tm{width:50px;flex-shrink:0;font-size:12px;font-weight:800;color:var(--teal-d);text-align:right;padding-top:10px}
+  .tl-time .doses{flex:1}
+  .dose{display:flex;align-items:center;gap:9px;background:var(--card);border-radius:11px;padding:9px 11px;box-shadow:var(--shadow);margin-bottom:6px;border-left:4px solid var(--rx)}
+  .dose.taken{opacity:.62}.dose.over{border-left-color:var(--rose)}
+  .dose .ck{width:19px;height:19px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:11px}
+  .dose.taken .ck{background:var(--green);border-color:var(--green)}
+  .dose .dn{font-size:12.5px;font-weight:700}.dose.taken .dn{text-decoration:line-through}
+  .dose .dd{font-size:10px;color:var(--slate)}
+  .dose .badge2{margin-left:auto;font-size:8px;font-weight:800;padding:2px 7px;border-radius:8px;text-transform:uppercase}
+  .badge2.over{background:#fbe7eb;color:var(--rose)}.badge2.due{background:#fbf0dc;color:var(--amber)}.badge2.up{background:#eef2f2;color:var(--slate)}.badge2.done{background:#e3f5ec;color:var(--green)}
+  .ix-alert{display:flex;gap:9px;align-items:flex-start;border-radius:11px;padding:10px 12px;margin-top:8px;border-left:4px solid var(--line)}
+  .ix-alert.sev-contra{border-left-color:#b5314a;background:#fdf0f2}.ix-alert.sev-major{border-left-color:var(--rose);background:#fff6f7}.ix-alert.sev-moderate{border-left-color:var(--amber);background:#fffaf0}.ix-alert.sev-minor{border-left-color:var(--green);background:#f1faf5}
+  .ix-alert .an{font-size:12.5px;font-weight:700}.ix-alert .ad{font-size:11px;color:#37474f;margin-top:1px}
+  .data-sec{background:var(--card);border-radius:12px;padding:12px 13px;box-shadow:var(--shadow);margin-bottom:10px}
+  .data-sec h4{margin:0 0 8px;font-size:12.5px;color:var(--teal-d)}
+  .lab{display:flex;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:12px}
+  .lab:last-child{border-bottom:none}.lab .ln{flex:1;font-weight:600}.lab .lv{font-weight:700}.lab .lu{font-size:9.5px;color:var(--slate);margin-left:3px}
+  .flag{font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:7px;margin-left:6px}
+  .flag.ok{background:#e3f5ec;color:var(--green)}.flag.hi{background:#fbe7eb;color:var(--rose)}.flag.lo{background:#fff3da;color:var(--amber)}.flag.tgt{background:#e2f6f3;color:var(--rx)}
+  .pill-list span{display:inline-block;font-size:11px;background:var(--mint);color:var(--teal-d);padding:3px 9px;border-radius:10px;margin:0 5px 5px 0;font-weight:600}
+  /* drug interaction checker */
+  .ix-search{display:flex;gap:7px;align-items:center}
+  .ix-search input{flex:1}
+  .ix-quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .ix-res{margin-top:11px;border-radius:13px;padding:12px 13px;border-left:4px solid var(--line);background:#fbfdfd}
+  .ix-res.sev-contra{border-left-color:#b5314a;background:#fdf0f2}
+  .ix-res.sev-major{border-left-color:var(--rose);background:#fff6f7}
+  .ix-res.sev-moderate{border-left-color:var(--amber);background:#fffaf0}
+  .ix-res.sev-minor{border-left-color:var(--green);background:#f1faf5}
+  .ix-res.sev-none{border-left-color:var(--slate)}
+  .ix-res .sb{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:3px 9px;border-radius:10px;margin-bottom:6px}
+  .sev-contra .sb{background:#b5314a;color:#fff} .sev-major .sb{background:#fbe7eb;color:var(--rose)} .sev-moderate .sb{background:#fbf0dc;color:var(--amber)} .sev-minor .sb{background:#e3f5ec;color:var(--green)} .sev-none .sb{background:#eef2f2;color:var(--slate)}
+  .ix-res .dn{font-size:13.5px;font-weight:700;margin-bottom:3px}
+  .ix-res .row{font-size:11.5px;color:#37474f;margin-top:4px}
+  .ix-res .row b{color:var(--ink)}
+
+  /* console */
+  .seg{display:flex;gap:5px;background:#eef4f4;padding:4px;border-radius:11px;margin-bottom:11px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:64px;border:none;background:transparent;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:600;color:var(--slate);cursor:pointer}
+  .seg button.on{background:#fff;color:var(--teal-d);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  label.fl{display:block;font-size:11.5px;font-weight:600;margin:11px 0 5px;color:var(--teal-d)}
+  input[type=text],textarea,select{width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;background:#fbfdfd;font-family:inherit;color:var(--ink)}
+  textarea{min-height:60px;resize:vertical}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--teal-l)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+  .chip{padding:7px 11px;border:1.5px solid var(--line);border-radius:18px;font-size:11.5px;font-weight:600;cursor:pointer;background:#fbfdfd;color:var(--slate)}
+  .chip.sel{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .btn{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--teal),var(--teal-l));color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:14px;box-shadow:var(--shadow)}
+  .btn:active{transform:scale(.98)}.btn.sm{padding:10px;font-size:12.5px;margin-top:9px}
+  .btn.ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal);box-shadow:none}
+  .btn.amber{background:linear-gradient(135deg,#e8a33d,#d6892a)}
+  .btn.rose{background:linear-gradient(135deg,#d6455d,#b5314a)}
+  .ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .ctrl-grid .btn{margin-top:0}
+
+  /* messages */
+  .chan{display:flex;gap:6px;margin-bottom:11px;overflow-x:auto;padding-bottom:2px}
+  .chan button{border:1.5px solid var(--line);background:#fff;border-radius:18px;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--slate);cursor:pointer;white-space:nowrap}
+  .chan button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .msg-wrap{display:flex;flex-direction:column;gap:8px;min-height:34vh;padding-bottom:6px}
+  .bubble{max-width:84%;padding:8px 11px;border-radius:14px;font-size:12.5px;line-height:1.4;box-shadow:var(--shadow)}
+  .bubble .who{font-size:9px;font-weight:700;opacity:.85;margin-bottom:2px}
+  .bubble .tm{font-size:8.5px;opacity:.6;margin-top:3px;text-align:right}
+  .bubble.them{align-self:flex-start;background:#fff;border-bottom-left-radius:4px}
+  .bubble.me{align-self:flex-end;background:var(--teal);color:#fff;border-bottom-right-radius:4px}
+  .bubble.them.r-physician{border-left:3px solid var(--md)}.bubble.them.r-pharmacist{border-left:3px solid var(--rx)}.bubble.them.r-coordinator{border-left:3px solid var(--co)}.bubble.them.r-patient{border-left:3px solid var(--pt)}
+  .composer{position:sticky;bottom:62px;display:flex;gap:7px;padding:8px 0;background:var(--bg)}
+  .composer input{flex:1;border-radius:20px}
+  .composer button{border:none;background:var(--teal);color:#fff;width:40px;height:40px;border-radius:50%;font-size:16px;cursor:pointer;flex-shrink:0}
+
+  .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--line);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+  @media(min-width:520px){.nav{border-radius:0 0 24px 24px;bottom:34px;max-width:460px}}
+  .nav button{flex:1;border:none;background:none;padding:8px 0 10px;font-size:9px;font-weight:600;color:var(--slate);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+  .nav button .ic{font-size:17px}.nav button.active{color:var(--teal)}
+  .nav .bdg{position:absolute;top:4px;right:50%;margin-right:-22px;background:var(--rose);color:#fff;font-size:8px;font-weight:700;border-radius:8px;padding:0 4px}
+
+  .empty{text-align:center;padding:44px 18px;color:var(--slate)}.empty .big{font-size:38px;margin-bottom:10px}
+  .footer-note{font-size:10px;color:#9bb0b0;text-align:center;margin:16px 6px 0;line-height:1.45}
+  .toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#13242b;color:#fff;padding:10px 15px;border-radius:20px;font-size:12px;font-weight:600;z-index:60;opacity:0;transition:.3s;pointer-events:none;max-width:90%;text-align:center}
+  .toast.show{opacity:1}
+  .banner{background:#fff6f7;border:1px solid #f5c6ce;border-radius:12px;padding:11px 13px;margin-bottom:11px;font-size:12px;color:#7a2230;font-weight:600;display:flex;gap:8px;align-items:flex-start}
+  .ok-banner{background:#eafaf2;border-color:#bfe9d2;color:#1f7a52}
+</style>
+</head>
+<body>
+<noscript><div style="padding:30px;text-align:center;font-family:sans-serif">Transplant Navigator needs JavaScript enabled to run.</div></noscript>
+<div class="shell">
+  <header id="hdr" style="display:none">
+    <div class="brand">
+      <div class="logo">🫘</div>
+      <div><h1>Transplant Navigator</h1><p id="hdrSub">Dubai Health</p></div>
+      <div class="hbtns">
+        <button class="icon-btn" id="installBtn" style="display:none" onclick="installApp()">⬇</button>
+        <button class="icon-btn" onclick="logout()">⎋</button>
+      </div>
+    </div>
+    <div class="roles" id="roles">
+      <button class="role" data-role="patient" onclick="setRole('patient')"><span class="ri">🧑</span>Patient</button>
+      <button class="role" data-role="physician" onclick="setRole('physician')"><span class="ri">🩺</span>Physician</button>
+      <button class="role" data-role="pharmacist" onclick="setRole('pharmacist')"><span class="ri">💊</span>Pharmacist</button>
+      <button class="role" data-role="coordinator" onclick="setRole('coordinator')"><span class="ri">📋</span>Coord.</button>
+    </div>
+    <div class="sync"><span class="d"></span><span id="syncTxt">Auto-synced from SALAMA</span></div>
+  </header>
+
+  <main>
+    <!-- LOGIN -->
+    <section class="screen active" id="login">
+      <div class="login-hero">
+        <div class="lg">🫘</div>
+        <h2>Transplant Navigator</h2>
+        <p>Dubai Health · kidney transplant journey</p>
+      </div>
+      <div class="login-body">
+        <h3>Sign in to your role</h3>
+        <p class="hint">Patients sign in through <b>MyChart / the Dubai Health app</b>; clinicians through SALAMA. All data is pulled automatically from SALAMA — no manual entry.</p>
+        <button class="role-pick" onclick="login('patient')"><span class="av" style="background:var(--pt)">🧑</span><span><span class="t">Patient</span><br><span class="s">Via MyChart / Dubai Health app — journey, results & meds</span></span><span class="arrow">›</span></button>
+        <button class="role-pick" onclick="login('physician')"><span class="av" style="background:var(--md)">🩺</span><span><span class="t">Transplant physician</span><br><span class="s">Clinical decisions, instructions, journey control</span></span><span class="arrow">›</span></button>
+        <button class="role-pick" onclick="login('pharmacist')"><span class="av" style="background:var(--rx)">💊</span><span><span class="t">Clinical pharmacist</span><br><span class="s">Medications, levels, interactions, counseling</span></span><span class="arrow">›</span></button>
+        <button class="role-pick" onclick="login('coordinator')"><span class="av" style="background:var(--co)">📋</span><span><span class="t">Transplant coordinator</span><br><span class="s">Clearances, waitlist, offers, logistics</span></span><span class="arrow">›</span></button>
+        <div class="platforms">
+          <span><span class="pi">🌐</span>Web</span><span><span class="pi">💻</span>Desktop</span><span><span class="pi">📱</span>Mobile</span>
+        </div>
+        <p style="text-align:center;margin:14px 0 0"><button onclick="resetDemo()" style="background:none;border:none;color:#9bb0b0;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">↺ Reset demo data</button></p>
+        <p class="footer-note">Educational prototype for Dubai Health. Connects only to SALAMA (Epic); patients reach the same record through MyChart / the Dubai Health app. Sync and cross-platform sign-in are simulated. Not a substitute for the transplant team's orders.</p>
+      </div>
+    </section>
+
+    <!-- JOURNEY (phase hub) -->
+    <section class="screen" id="journey">
+      <div class="phasebar">
+        <h2 id="phTitle">—</h2>
+        <div class="sub" id="phSub">—</div>
+        <div class="ptrack" id="ptrack"></div>
+        <div class="plabels" id="plabels">
+          <span data-i="0">Clearances</span><span data-i="1">Waitlist</span><span data-i="2">Offer</span><span data-i="3">Surgery</span><span data-i="4">Post-Tx</span>
+        </div>
+      </div>
+      <div id="phaseBody"></div>
+    </section>
+
+    <!-- TODAY -->
+    <section class="screen" id="today">
+      <div class="stat-row">
+        <div class="stat"><div class="n" id="stPhase">—</div><div class="l">Phase</div></div>
+        <div class="stat"><div class="n" id="stTasks">—</div><div class="l">Open tasks</div></div>
+        <div class="stat"><div class="n" id="stItems">—</div><div class="l">Care items</div></div>
+      </div>
+      <div id="todayInbox"></div>
+      <div class="sec-h">My action items</div>
+      <div id="taskList"></div>
+    </section>
+
+    <!-- MEDS / DATA -->
+    <section class="screen" id="meds"><div id="medsBody"></div></section>
+
+    <!-- CONSOLE (staff) -->
+    <section class="screen" id="console"><div id="consoleBody"></div></section>
+
+    <!-- MESSAGES -->
+    <section class="screen" id="messages">
+      <div class="chan" id="chanBar"></div>
+      <div class="msg-wrap" id="msgWrap"></div>
+      <div class="composer">
+        <input type="text" id="msgInput" placeholder="Message the care team…" onkeydown="if(event.key==='Enter')sendMsg()">
+        <button onclick="sendMsg()">➤</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="nav" id="nav" style="display:none"></nav>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== STATE ===== */
+const KEY='tnav_v3';
+const PHASES=['clearance','listed','offer','periop','post'];
+const PHASE_META={
+  clearance:{i:0,title:'Pre-transplant evaluation',sub:'Completing clearances from every department'},
+  listed:{i:1,title:'Active on the waiting list',sub:'Cleared and listed — being considered for every matching kidney'},
+  offer:{i:2,title:'Kidney offer — you’ve been selected',sub:'Follow each step from offer to surgery'},
+  periop:{i:3,title:'Surgery & early recovery',sub:'Transplant and the critical first days'},
+  post:{i:4,title:'Post-transplant care',sub:'Protecting your new kidney for the long term'}
+};
+let state=null;
+function fresh(){return {
+  role:null, phase:'clearance', syncedAt:nowShort(),
+  patient:{name:'Ahmed K.', eid:'784-1982-3456789-1', mrn:'SAL-204517', blood:'O+', age:46, cause:'Diabetic nephropathy', dialysis:'Haemodialysis ×3/week (18 months)'},
+  clearances:seedClearances(),
+  waitlist:{active:false, band:'—', accruedMonths:0, status:'Not yet listed', matchScore:'—'},
+  offer:{stage:-1, donorType:'Deceased donor (DBD)', dgf:false},
+  meds:[], followups:[], investigations:[],
+  careItems:[], messages:[], done:{}, medTaken:{}
+};}
+function seedClearances(){
+  const M=(dept,ic,detail,status,owner)=>({id:'c'+Math.random().toString(36).slice(2,7),dept,cat:'medical',ic,detail,status,owner,date:''});
+  const N=(dept,ic,detail,status,owner)=>({...M(dept,ic,detail,status,owner),cat:'nonmedical'});
+  return [
+    M('Nephrology assessment','🩺','Transplant suitability & ESKD review','cleared','Dr. Physician'),
+    M('Tissue typing & cross-match','🧬','HLA typing, cPRA, antibody screen','cleared','HLA lab'),
+    M('Cardiology clearance','❤️','ECHO + stress test (diabetic)','in_progress','Cardiology'),
+    M('Infectious disease screen','🦠','CMV, EBV, Hep B/C, HIV, TB (IGRA)','cleared','Virology'),
+    M('Anaesthesia (pre-op clinic)','💉','Fitness for surgery & airway','scheduled','Anaesthesia'),
+    M('Dental clearance','🦷','Remove infection sources pre-immunosuppression','pending','Dental'),
+    M('Radiology','🩻','CXR, abdominal US, iliac vessel imaging','in_progress','Radiology'),
+    M('Vaccination update','💉','Incl. live vaccines before transplant','action','Pharmacy'),
+    N('Social work assessment','🤝','Home support & caregiver plan','cleared','Social work'),
+    N('Psychology evaluation','🧠','Coping & adherence readiness','scheduled','Psychology'),
+    N('Financial / insurance approval','💳','Funding & coverage confirmation','in_progress','Finance office'),
+    N('Pharmacy pre-listing education','💊','Immunosuppression teaching','pending','Clinical pharmacist'),
+    N('Transplant committee approval','✅','Final multidisciplinary listing decision','pending','Tx committee')
+  ];
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function loadState(){try{const s=localStorage.getItem(KEY);if(s)state=JSON.parse(s)}catch(e){}}
+function nowShort(){return new Date().toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+function nowTime(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+function dateShort(){return new Date().toLocaleDateString([],{month:'short',day:'numeric'})}
+const isStaff=()=>['physician','pharmacist','coordinator'].includes(state.role);
+const roleName={patient:'Patient',physician:'Dr. (Physician)',pharmacist:'Clinical Pharmacist',coordinator:'Coordinator'};
+const roleIcon={patient:'🧑',physician:'🩺',pharmacist:'💊',coordinator:'📋'};
+
+/* ===== AUTH / NAV ===== */
+function login(r){ if(!state) state=fresh(); state.role=r; save(); showApp(); setRole(r); }
+function resetDemo(){ try{localStorage.removeItem(KEY)}catch(e){} location.reload(); }
+function logout(){ state.role=null; save(); document.getElementById('hdr').style.display='none'; document.getElementById('nav').style.display='none'; go('login'); }
+function showApp(){ document.getElementById('hdr').style.display='block'; document.getElementById('nav').style.display='flex'; }
+
+const NAVS={
+  patient:[['journey','🗺️','Journey'],['today','📋','Today'],['meds','💊','Health'],['messages','💬','Messages']],
+  physician:[['console','🎛️','Console'],['journey','🗺️','Journey'],['meds','💊','Meds'],['messages','💬','Messages']],
+  pharmacist:[['console','🎛️','Console'],['journey','🗺️','Journey'],['meds','💊','Meds'],['messages','💬','Messages']],
+  coordinator:[['console','🎛️','Console'],['journey','🗺️','Journey'],['today','📋','Tasks'],['messages','💬','Messages']]
+};
+let currentScreen='login';
+function renderNav(){
+  const nav=document.getElementById('nav'); nav.innerHTML='';
+  const unread=state.messages.filter(m=>m.role!==state.role&&!m._seen).length;
+  NAVS[state.role].forEach(([id,ic,lbl])=>{
+    const b=document.createElement('button'); b.dataset.screen=id; b.onclick=()=>go(id);
+    b.innerHTML='<span class="ic">'+ic+'</span>'+lbl+((id==='messages'&&unread)?'<span class="bdg">'+unread+'</span>':'');
+    nav.appendChild(b);
+  });
+  markNav(currentScreen);
+}
+function markNav(id){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id))}
+function go(id){
+  currentScreen=id;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+  markNav(id);
+  if(id==='messages'){state.messages.forEach(m=>m._seen=true);save();renderNav();renderMessages();}
+  window.scrollTo(0,0);
+}
+function setRole(r){
+  state.role=r; save();
+  document.querySelectorAll('.role').forEach(b=>b.classList.toggle('active',b.dataset.role===r));
+  document.getElementById('hdrSub').textContent={patient:'Dubai Health · my journey',physician:'Transplant physician · SALAMA',pharmacist:'Clinical pharmacist · SALAMA',coordinator:'Transplant coordinator · SALAMA'}[r];
+  renderAll(); renderNav();
+  go(state.role==='patient'?'journey':'console');
+}
+
+/* ===== RENDER ROOT ===== */
+function renderAll(){ renderPhasebar(); renderJourney(); renderToday(); renderMeds(); renderConsole(); renderMessages(); updateSync(); }
+function updateSync(){ const e=document.getElementById('syncTxt'); if(!e)return; e.textContent = state.role==='patient' ? 'Live from SALAMA · MyChart & Dubai Health app' : 'Live from SALAMA (Epic) EMR'; }
+function renderPhasebar(){
+  const m=PHASE_META[state.phase];
+  document.getElementById('phTitle').textContent=m.title;
+  document.getElementById('phSub').textContent=state.patient.name+' · '+m.sub;
+  const t=document.getElementById('ptrack'); t.innerHTML='';
+  for(let i=0;i<5;i++){const s=document.createElement('div');s.className='seg'+(i<m.i?' on':i===m.i?' cur':'');t.appendChild(s);}
+  document.querySelectorAll('#plabels span').forEach(s=>s.classList.toggle('on',+s.dataset.i<=m.i));
+}
+
+/* ===== JOURNEY PHASE HUB ===== */
+function renderJourney(){
+  const b=document.getElementById('phaseBody'); if(!b)return;
+  let h;
+  if(state.phase==='clearance') h=viewClearance();
+  else if(state.phase==='listed') h=viewListed();
+  else if(state.phase==='offer') h=viewOffer();
+  else if(state.phase==='periop') h=viewPeriop();
+  else h=viewPost();
+  if(state.phase!=='clearance') h+=clearanceRecap();
+  b.innerHTML=h;
+}
+function clearanceRecap(){
+  const med=state.clearances.filter(c=>c.cat==='medical'); const non=state.clearances.filter(c=>c.cat==='nonmedical');
+  let h='<div class="sec-h" style="margin-top:18px">🔎 Pre-transplant clearances <span class="pill">'+clrPct()+'% complete</span></div>';
+  h+='<div class="hint" style="margin:-2px 2px 9px;font-size:11.5px;color:var(--slate)">Your full pre-transplant workup — kept here for your records, in every phase.</div>';
+  h+='<div class="sec-h">🏥 Medical</div>'+med.map(clrRow).join('');
+  h+='<div class="sec-h">📋 Non-medical</div>'+non.map(clrRow).join('');
+  return h;
+}
+function clrPct(){const c=state.clearances;return Math.round(100*c.filter(x=>x.status==='cleared').length/c.length)}
+function clrRow(c){
+  const lbl={cleared:'Cleared',in_progress:'In progress',scheduled:'Scheduled',action:'Action needed',pending:'Pending'}[c.status];
+  return '<div class="clr s-'+c.status+'"><div class="ic">'+c.ic+'</div><div><div class="nm">'+c.dept+'</div><div class="dt">'+c.detail+(c.owner?' · '+c.owner:'')+'</div></div><div class="st s-'+c.status+'">'+lbl+'</div></div>';
+}
+function viewClearance(){
+  const pct=clrPct(); const med=state.clearances.filter(c=>c.cat==='medical'); const non=state.clearances.filter(c=>c.cat==='nonmedical');
+  const pend=state.clearances.filter(c=>c.status!=='cleared').length;
+  let h='<div class="card"><div class="prog-ring"><div class="ring" style="--p:'+pct+'"><i>'+pct+'%</i></div><div><h3 style="margin:0">Clearance progress</h3><div class="hint" style="margin:3px 0 0">'+ (state.clearances.length-pend) +' of '+state.clearances.length+' departments cleared · '+pend+' remaining before listing</div></div></div></div>';
+  if(state.clearances.some(c=>c.status==='action')) h+='<div class="banner">⚠ <span>One or more items need attention before you can be listed. Your coordinator will guide you.</span></div>';
+  h+='<div class="sec-h">🏥 Medical clearances <span class="pill">'+med.filter(c=>c.status==='cleared').length+'/'+med.length+'</span></div>'+med.map(clrRow).join('');
+  h+='<div class="sec-h">📋 Non-medical clearances <span class="pill">'+non.filter(c=>c.status==='cleared').length+'/'+non.length+'</span></div>'+non.map(clrRow).join('');
+  h+='<p class="footer-note">Statuses update automatically from SALAMA as each department signs off. Your coordinator and physician can add reminders and instructions.</p>';
+  return h;
+}
+function viewListed(){
+  const w=state.waitlist;
+  let h='<div class="wl-card"><div class="wl-status"><span class="d"></span>'+(w.active?'ACTIVE ON THE LIST':'INACTIVE')+'</div>'+
+    '<div class="wl-big">You’re being considered</div><div class="wl-sub">for every matching kidney, 24/7</div>'+
+    '<div class="wl-stats"><div class="s"><div class="n">'+w.band+'</div><div class="l">Priority band</div></div>'+
+    '<div class="s"><div class="n">'+w.accruedMonths+' mo</div><div class="l">Waiting time</div></div>'+
+    '<div class="s"><div class="n">'+state.patient.blood+'</div><div class="l">Blood group</div></div></div>'+
+    '<div class="wl-note">Kidney allocation is based on matching (blood group, tissue match, antibodies, waiting time) — not a simple line. You don’t need to do anything but stay reachable and healthy. We’ll call instantly when a kidney matches.</div></div>';
+  h+='<div class="card"><h3>Stay transplant-ready ✅</h3><div class="hint">Quick checks that keep you active on the list.</div>'+
+    '<div class="task"><div class="ck"></div><div><div class="tx">Keep your phone reachable 24/7</div><div class="mt">Answer the centre’s call fast</div></div></div>'+
+    '<div class="task"><div class="ck"></div><div><div class="tx">Attend every dialysis & clinic visit</div><div class="mt">Monthly serum kept for cross-match</div></div></div>'+
+    '<div class="task"><div class="ck"></div><div><div class="tx">Report any new illness</div><div class="mt">May briefly pause your active status</div></div></div></div>';
+  h+='<p class="footer-note">All clearances completed — you were approved by the transplant committee and activated on the Dubai Health waiting list. Your full clearance record is shown below.</p>';
+  return h;
+}
+const OFFER_STEPS=[
+  ['Offer received & you were selected','A matching kidney was offered and the team selected you. The coordinator has been in touch.','📞'],
+  ['Admission to hospital','Come in now — don’t eat or drink. Pre-op bloods, consent and preparation.','🏥'],
+  ['Donor kidney retrieval','The donor operation to recover the kidney. You can follow each update here.','🫘'],
+  ['Organ transport & cold storage','The kidney is preserved and transported to your centre.','❄️'],
+  ['Final cross-match','A last compatibility test confirms the kidney is safe for you.','🧬'],
+  ['Transplant surgery','Your operation — the kidney is placed in your lower abdomen (2–4 hours).','🏥'],
+  ['Recovery & graft watch','Waking up; the team watches closely for how quickly the kidney works.','🌱']
+];
+function viewOffer(){
+  let h='<div class="offer-banner"><div class="big">🎉</div><h3>You’ve been selected for a kidney</h3><p>'+state.offer.donorType+' · follow every step below in real time</p></div>';
+  h+='<div class="stepper">';
+  OFFER_STEPS.forEach((s,i)=>{
+    const cls=i<state.offer.stage?'done':i===state.offer.stage?'cur':'';
+    h+='<div class="step '+cls+'"><div class="dot"></div><div class="box"><div class="t">'+s[2]+' '+s[0]+(i===state.offer.stage?'<span class="liveb">live</span>':'')+'</div><div class="d">'+s[1]+'</div></div></div>';
+  });
+  h+='</div>';
+  if(state.offer.dgf) h+='<div class="card dgf-card"><h3>⏳ Delayed graft function possible</h3><div class="hint" style="margin:0">This deceased-donor kidney may "sleep" for a few days and you might need short-term dialysis. It’s common and usually temporary — the team is monitoring closely.</div></div>';
+  h+='<p class="footer-note">Every step is updated live by your transplant coordinator and surgical team, straight from SALAMA.</p>';
+  return h;
+}
+function viewPeriop(){
+  let h='<div class="card ok-banner" style="border-radius:18px"><h3 style="color:#1f7a52">✅ Transplant completed</h3><div class="hint" style="margin:2px 0 0">Your new kidney is in place. The first days are the highest-vigilance window — frequent blood tests and close monitoring.</div></div>';
+  if(state.offer.dgf) h+='<div class="card dgf-card"><h3>⏳ Delayed graft function</h3><div class="hint" style="margin:0 0 8px">Your kidney is waking up slowly — you may need a few short dialysis sessions. This is common with deceased-donor kidneys and usually resolves. We track it daily.</div><div class="tg" style="color:var(--amber);background:#fbf0dc;display:inline-block;font-size:11px;padding:3px 9px;border-radius:9px">Daily: creatinine · urine output · fluid balance</div></div>';
+  h+='<div class="sec-h">First-week watch</div>';
+  [['🩸','Frequent blood tests','2–3×/week: creatinine, tacrolimus level, blood counts'],
+   ['💧','Daily weights & urine output','Reported each morning — your team is watching'],
+   ['🛡️','Anti-rejection medicines started','Take exactly on time — the single most important habit'],
+   ['🌡️','Watch for warning signs','Fever, less urine, pain over the kidney — tell us immediately']].forEach(x=>{
+    h+='<div class="clr s-in_progress"><div class="ic">'+x[0]+'</div><div><div class="nm">'+x[1]+'</div><div class="dt">'+x[2]+'</div></div></div>';
+  });
+  h+='<p class="footer-note">Recommendations from your physician and pharmacist appear under Today and Health.</p>';
+  return h;
+}
+function viewPost(){
+  let h='<div class="card"><h3>🌳 Living well with your transplant</h3><div class="hint" style="margin:0">Your journey is now long-term care: medicines, monitoring and follow-up. Everything below is kept in sync with SALAMA.</div></div>';
+  h+='<div class="sec-h">📅 Upcoming follow-ups</div>';
+  const fu=state.followups.length?state.followups:[{t:'Transplant clinic',d:'in 1 week · Dr. review + labs'},{t:'Lab — tacrolimus trough',d:'in 3 days · fasting not required'},{t:'BK & CMV PCR',d:'in 2 weeks · viral surveillance'}];
+  fu.forEach(x=> h+='<div class="clr s-scheduled"><div class="ic">📅</div><div><div class="nm">'+x.t+'</div><div class="dt">'+x.d+'</div></div></div>');
+  h+='<div class="sec-h">🔬 Investigations due</div>';
+  const inv=state.investigations.length?state.investigations:[{t:'Creatinine / eGFR',d:'weekly → monthly'},{t:'Tacrolimus trough',d:'each visit · target 8–11 → 5–8 ng/mL'},{t:'Urine protein',d:'monthly'}];
+  inv.forEach(x=> h+='<div class="clr s-in_progress"><div class="ic">🔬</div><div><div class="nm">'+x.t+'</div><div class="dt">'+x.d+'</div></div></div>');
+  h+='<p class="footer-note">Open Health for your medicines and Today for your team’s latest recommendations.</p>';
+  return h;
+}
+
+/* ===== TODAY ===== */
+function renderToday(){
+  document.getElementById('stPhase').textContent={clearance:'Clear',listed:'Listed',offer:'Offer',periop:'Surgery',post:'Post-Tx'}[state.phase];
+  const tasks=patientTasks();
+  document.getElementById('stTasks').textContent=tasks.filter((_,i)=>!state.done['t'+i]).length;
+  document.getElementById('stItems').textContent=state.careItems.length;
+  const inb=document.getElementById('todayInbox');
+  let top = state.role==='patient' ? medReminderHTML() : '';
+  let body='';
+  if(state.careItems.length){
+    body='<div class="sec-h">📥 From your care team</div>';
+    state.careItems.slice().reverse().forEach(it=>{
+      body+='<div class="ci t-'+it.type+'"><div class="h"><span class="ty">'+it.type+'</span><span class="fr">'+roleIcon[it.role]+' '+it.author+' · '+it.date+'</span></div><div class="tt">'+esc(it.title)+'</div><div class="tx">'+esc(it.text)+'</div>'+
+        (it.ack?'<div class="ack">✓ Acknowledged</div>':(state.role==='patient'?'<button class="btn ghost sm" onclick="ackItem(\''+it.id+'\')">Mark as read</button>':'<div style="font-size:10px;color:var(--slate);margin-top:4px">Delivered · awaiting patient</div>'))+'</div>';
+    });
+  } else body='<div class="empty"><div class="big">📥</div>No care-team items yet.</div>';
+  inb.innerHTML=top+body;
+  const tl=document.getElementById('taskList'); tl.innerHTML='';
+  tasks.forEach((t,i)=>{
+    const done=state.done['t'+i];
+    const el=document.createElement('div'); el.className='task'+(done?' done':'');
+    el.innerHTML='<div class="ck">'+(done?'✓':'')+'</div><div><div class="tx">'+t.t+'</div><div class="mt">'+t.m+'</div></div>';
+    el.querySelector('.ck').onclick=()=>{state.done['t'+i]=!state.done['t'+i];save();renderToday();};
+    tl.appendChild(el);
+  });
+}
+function ackItem(id){const it=state.careItems.find(x=>x.id===id);if(it){it.ack=true;save();renderToday();toast('Acknowledged');}}
+function patientTasks(){
+  const T={
+    clearance:[{t:'Attend cardiology appointment',m:'ECHO + stress test'},{t:'Complete dental clearance',m:'Before immunosuppression'},{t:'Update vaccinations',m:'Live vaccines now, not after'},{t:'Finish financial approval',m:'With the finance office'}],
+    listed:[{t:'Keep your phone reachable 24/7',m:'Answer the call fast'},{t:'Attend every dialysis session',m:'Stay active on the list'},{t:'Report any illness promptly',m:'May pause active status'}],
+    offer:[{t:'Come to hospital immediately',m:'Do not eat or drink'},{t:'Bring your medicine list & ID',m:'And a support person'},{t:'Stay reachable for the team',m:'Updates appear live here'}],
+    periop:[{t:'Take anti-rejection meds on time',m:'Never skip a dose'},{t:'Report weight, urine & temperature',m:'Every morning'},{t:'Watch for fever or low urine',m:'Tell the team immediately'}],
+    post:[{t:'Take immunosuppression on time daily',m:'Lifelong — most important habit'},{t:'Attend all lab & clinic visits',m:'Frequent at first'},{t:'Avoid grapefruit & new supplements',m:'They change drug levels'},{t:'Daily sunscreen',m:'Higher skin-cancer risk'}]
+  };
+  return T[state.phase];
+}
+
+/* ===== MEDS / HEALTH ===== */
+function renderMeds(){
+  const b=document.getElementById('medsBody'); if(!b)return;
+  if(!state.medTaken) state.medTaken={};
+  const post=['periop','post'].includes(state.phase);
+  let h='<div class="card"><h3>'+(state.role==='pharmacist'?'Medication management':'Medicines & health record')+'</h3><div class="hint" style="margin:0">Auto-synced from SALAMA. '+(post?'Post-transplant regimen, schedule and interaction screening.':'Pre-transplant medicines and baseline labs.')+'</div></div>';
+  h+=renderMedAlerts(post);
+  h+='<div class="sec-h">⏰ Today’s medication schedule</div>'+renderMedTimeline(post);
+  h+=ixCheckerHTML('');
+  h+='<div class="sec-h">💊 Active medications</div>';
+  medList(post).forEach(m=> h+=medCard(m));
+  h+='<div class="data-sec"><h4>🧪 Recent labs (SALAMA)</h4>'+labRows(post)+'</div>';
+  if(!post) h+='<p class="footer-note">Immunosuppression begins at transplant. Pre-listing pharmacy education covers what to expect.</p>';
+  b.innerHTML=h;
+}
+/* scheduling + auto interaction screening */
+function curMin(){const d=new Date();return d.getHours()*60+d.getMinutes();}
+function hm(t){const p=t.split(':');return (+p[0])*60+(+p[1]);}
+function dateKey(){return new Date().toISOString().slice(0,10);}
+function doseKey(t,nm){return dateKey()+'|'+t+'|'+nm;}
+function freqLabel(times){const n=times.filter(t=>t!=='—').length;return {1:'once daily',2:'twice daily',3:'three times daily'}[n]||(times[0]==='—'?'weekly':'');}
+function screenMed(m){const key=(m.ix&&m.ix.length)?m.ix:m.n.toLowerCase();return checkIx(key)||{sev:'none'};}
+function toggleDose(k){state.medTaken[k]=!state.medTaken[k];save();renderMeds();}
+function medCard(m){
+  const ix=screenMed(m);
+  const times=m.times.filter(t=>t!=='—');
+  const sched=times.length?'<div class="sched">'+times.map(t=>'<span class="t">'+t+'</span>').join('')+'<span style="color:var(--slate)">'+freqLabel(m.times)+'</span></div>':'<div class="sched"><span class="t">weekly</span></div>';
+  const badge=ix.sev!=='none'?'<span class="ixb sev-'+ix.sev+'">'+ix.sev+'</span>':'';
+  return '<div class="med"><div class="mn">'+m.n+badge+'</div><div class="mc">'+m.c+'</div>'+(m.t?'<div class="tg">'+m.t+'</div>':'')+sched+'</div>';
+}
+function renderMedTimeline(post){
+  const meds=medList(post); const slots={};
+  meds.forEach(m=>m.times.forEach(t=>{if(t==='—')return;(slots[t]=slots[t]||[]).push(m);}));
+  const times=Object.keys(slots).sort();
+  if(!times.length) return '<div class="empty" style="padding:18px"><div class="big">⏰</div>No scheduled doses.</div>';
+  const now=curMin(); let h='';
+  times.forEach(t=>{
+    h+='<div class="tl-time"><div class="tm">'+t+'</div><div class="doses">';
+    slots[t].forEach(m=>{
+      const nm=m.n; const k=doseKey(t,nm); const taken=!!state.medTaken[k]; const tmin=hm(t);
+      const status=taken?'done':(now>tmin+30?'over':(now>=tmin-15?'due':'up'));
+      const lbl={done:'Taken',over:'Overdue',due:'Due now',up:'Upcoming'}[status];
+      h+='<div class="dose'+(taken?' taken':'')+(status==='over'?' over':'')+'"><div class="ck" onclick="toggleDose(\''+k+'\')">'+(taken?'✓':'')+'</div><div><div class="dn">'+nm+'</div><div class="dd">'+freqLabel(m.times)+'</div></div><span class="badge2 '+status+'">'+lbl+'</span></div>';
+    });
+    h+='</div></div>';
+  });
+  return h;
+}
+function renderMedAlerts(post){
+  const meds=medList(post); const ixAlerts=[];
+  meds.forEach(m=>{const ix=screenMed(m);if(['contra','major','moderate'].includes(ix.sev))ixAlerts.push({m,ix});});
+  const now=curMin(); let overdue=0;
+  meds.forEach(m=>m.times.forEach(t=>{if(t==='—')return;if(!state.medTaken[doseKey(t,m.n)]&&now>hm(t)+30)overdue++;}));
+  if(!ixAlerts.length&&!overdue) return '<div class="card ok-banner" style="border-radius:14px;padding:11px 13px;margin-bottom:13px"><div style="font-size:12.5px;color:#1f7a52;font-weight:700">✓ No medication alerts — schedule on track, no significant interactions in the active list.</div></div>';
+  let h='<div class="card"><h3 style="font-size:13.5px">🔔 Medication alerts</h3>';
+  if(overdue) h+='<div class="ix-alert sev-major"><span style="font-size:16px">⏰</span><div><div class="an">'+overdue+' dose'+(overdue>1?'s':'')+' overdue today</div><div class="ad">Mark them taken below, or take now if missed. Never double-dose tacrolimus — if it’s nearly time for the next dose, skip and continue.</div></div></div>';
+  const staff=isStaff();
+  ixAlerts.forEach(a=>{h+='<div class="ix-alert sev-'+a.ix.sev+'"><span style="font-size:16px">⚠️</span><div><div class="an">'+a.m.n+' — '+a.ix.sev+' interaction</div><div class="ad">'+(staff?esc(a.ix.mech+' '+a.ix.mgmt):esc(a.ix.pt))+'</div></div></div>';});
+  h+='</div>'; return h;
+}
+function labRows(post){
+  const L=[
+    ['Creatinine',post?'1.4':'7.1','mg/dL',post?'ok':'hi',post?'STABLE':'ESKD'],
+    ['eGFR',post?'56':'8','mL/min',post?'ok':'lo',post?'GRAFT':'ESKD'],
+    ['Potassium','4.6','mmol/L','ok','WNL'],
+    ['Haemoglobin',post?'11.6':'9.8','g/dL','lo',post?'LOW':'ANAEMIA'],
+    post?['Tacrolimus trough','9.1','ng/mL','tgt','TARGET 8–11']:['cPRA','12','%','ok','LOW'],
+    ['CMV PCR','Not detected','','ok','NEG']
+  ];
+  return L.map(x=>'<div class="lab"><span class="ln">'+x[0]+'</span><span class="lv">'+x[1]+'<span class="lu">'+x[2]+'</span></span><span class="flag '+x[3]+'">'+x[4]+'</span></div>').join('');
+}
+function medList(post){
+  if(!post) return [
+    {n:'Insulin glargine',c:'Diabetes — optimise control pre-op',t:'',times:['22:00'],ix:''},
+    {n:'Amlodipine',c:'Blood pressure',t:'',times:['08:00'],ix:'amlodipine'},
+    {n:'Erythropoietin',c:'Renal anaemia · weekly injection',t:'',times:['—'],ix:''},
+    {n:'Phosphate binder',c:'With meals',t:'',times:['08:00','13:00','20:00'],ix:''}
+  ];
+  return [
+    {n:'Tacrolimus (CNI)',c:'Main anti-rejection medicine · 12 h apart',t:'Trough target 8–11 → 5–8 ng/mL',times:['08:00','20:00'],ix:''},
+    {n:'Mycophenolate (MMF)',c:'Anti-proliferative · with tacrolimus',t:'Watch GI & blood counts',times:['08:00','20:00'],ix:''},
+    {n:'Prednisolone',c:'Steroid · tapered over time',t:'Monitor glucose & bone',times:['08:00'],ix:''},
+    {n:'Valganciclovir',c:'CMV prevention · with food',t:'3–6 months · renally dosed',times:['08:00'],ix:''},
+    {n:'Co-trimoxazole',c:'Pneumocystis prevention',t:'6–12 months',times:['20:00'],ix:'co-trimoxazole'},
+    {n:'Amlodipine',c:'Blood pressure',t:'',times:['08:00'],ix:'amlodipine'},
+    {n:'Atorvastatin',c:'Cholesterol — muscle-pain caution with CNI',t:'',times:['20:00'],ix:'atorvastatin'}
+  ];
+}
+
+/* ===== CONSOLE (staff) ===== */
+function renderConsole(){
+  const b=document.getElementById('consoleBody'); if(!b)return;
+  if(state.role==='patient'){ b.innerHTML=''; return; }
+  let h='<div class="card"><h3>'+roleIcon[state.role]+' '+{physician:'Physician console',pharmacist:'Pharmacist console',coordinator:'Coordinator console'}[state.role]+'</h3>'+
+    '<div class="hint" style="margin:0 0 4px">SALAMA-linked · '+state.patient.name+' · MRN '+state.patient.mrn+'</div>'+
+    '<div class="pill-list"><span>'+state.patient.blood+'</span><span>'+state.patient.cause+'</span><span>'+state.patient.dialysis+'</span></div></div>';
+
+  // composer
+  h+='<div class="card"><h3 style="font-size:13.5px">Send to patient journey</h3>'+
+    '<div class="seg" id="ciSeg">'+
+      '<button class="on" data-t="instruction" onclick="selType(this)">Instruction</button>'+
+      '<button data-t="recommendation" onclick="selType(this)">Recommend</button>'+
+      '<button data-t="result" onclick="selType(this)">Result</button>'+
+      '<button data-t="reminder" onclick="selType(this)">Reminder</button>'+
+    '</div>'+
+    '<label class="fl">Title</label><input type="text" id="ci_title" oninput="checkComposerIx()" placeholder="e.g. Start fluconazole / Tacrolimus level 9.1">'+
+    '<label class="fl">Detail for the patient</label><textarea id="ci_text" oninput="checkComposerIx()" placeholder="Plain-language message…"></textarea>'+
+    '<div id="ciWarn"></div>'+
+    '<div class="chips" id="ciQuick"></div>'+
+    '<button class="btn" onclick="pushItem()">📤 Send to patient</button></div>';
+
+  // role-specific controls
+  if(state.role==='coordinator') h+=coordControls();
+  if(state.role==='physician') h+=physicianControls();
+  if(state.role==='pharmacist') h+=pharmacistControls();
+
+  // sent items
+  if(state.careItems.length){
+    h+='<div class="sec-h">Sent items</div>';
+    h+=state.careItems.slice().reverse().map(it=>'<div class="ci t-'+it.type+'"><div class="h"><span class="ty">'+it.type+'</span><span class="fr">'+it.author+' · '+it.date+'</span></div><div class="tt">'+esc(it.title)+'</div><div class="tx">'+esc(it.text)+'</div>'+(it.ack?'<div class="ack">✓ Patient acknowledged</div>':'<div style="font-size:10px;color:var(--slate);margin-top:4px">Delivered · awaiting acknowledgement</div>')+'</div>').join('');
+  }
+  b.innerHTML=h;
+  renderQuick();
+}
+function coordControls(){
+  let h='<div class="card"><h3 style="font-size:13.5px">📋 Clearance & listing control</h3><div class="hint" style="margin:0 0 8px">Tap a department to advance its status (auto-written to SALAMA).</div>';
+  state.clearances.forEach(c=>{ h+='<div class="clr s-'+c.status+'" style="cursor:pointer" onclick="cycleClr(\''+c.id+'\')"><div class="ic">'+c.ic+'</div><div><div class="nm">'+c.dept+'</div><div class="dt">tap to advance · '+c.status.replace('_',' ')+'</div></div><div class="st s-'+c.status+'">'+c.status.replace('_',' ')+'</div></div>'; });
+  h+='<div class="ctrl-grid"><button class="btn sm" onclick="activateList()">✅ Approve & list</button><button class="btn sm amber" onclick="triggerOffer()">📞 Trigger offer</button></div>';
+  h+='</div>';
+  h+=journeyControls();
+  return h;
+}
+function physicianControls(){
+  let h='<div class="card"><h3 style="font-size:13.5px">🩺 Clinical controls</h3>'+
+    '<div class="ctrl-grid"><button class="btn sm rose" onclick="toggleDGF()">⏳ Toggle DGF: '+(state.offer.dgf?'ON':'OFF')+'</button><button class="btn sm" onclick="setPhase(\'post\')">🌳 Move to post-Tx</button></div></div>';
+  h+=journeyControls();
+  return h;
+}
+function pharmacistControls(){
+  return '<div class="card"><h3 style="font-size:13.5px">💊 Pharmacist quick-add</h3><div class="hint" style="margin:0 0 6px">Use the composer above with a Recommendation or Reminder. Common items:</div><div class="chips"><span class="chip" onclick="quickPush(\'recommendation\',\'Switch to once-daily tacrolimus\',\'Improves adherence; same total daily dose. Take each morning.\')">Once-daily tac</span><span class="chip" onclick="quickPush(\'reminder\',\'Avoid grapefruit & St John’s Wort\',\'They change tacrolimus levels. Check with pharmacy before any new product.\')">Interaction alert</span><span class="chip" onclick="quickPush(\'instruction\',\'Hold MMF dose today\',\'Due to low white cell count. Resume tomorrow unless told otherwise.\')">Hold MMF</span></div></div>'+ixCheckerHTML('C');
+}
+function journeyControls(){
+  return '<div class="card"><h3 style="font-size:13.5px">🗺️ Journey stage (demo control)</h3><div class="hint" style="margin:0 0 8px">Advance the patient through the journey to see each view.</div>'+
+    '<div class="seg">'+PHASES.map(p=>'<button class="'+(state.phase===p?'on':'')+'" onclick="setPhase(\''+p+'\')">'+{clearance:'Clear',listed:'List',offer:'Offer',periop:'Surgery',post:'Post'}[p]+'</button>').join('')+'</div>'+
+    (state.phase==='offer'?'<button class="btn sm amber" onclick="advanceOffer()">▶ Advance retrieval step ('+(state.offer.stage+1)+'/'+OFFER_STEPS.length+')</button>':'')+'</div>';
+}
+let ciType='instruction';
+function selType(btn){ciType=btn.dataset.t;document.querySelectorAll('#ciSeg button').forEach(x=>x.classList.toggle('on',x===btn));renderQuick();}
+function renderQuick(){
+  const w=document.getElementById('ciQuick'); if(!w)return;
+  const byRole={
+    physician:{instruction:['Come in for a biopsy','Repeat labs in 3 days','Increase fluids'],recommendation:['Reduce immunosuppression','Start ACE inhibitor','Dermatology referral'],result:['Creatinine improving','Biopsy: no rejection','DSA negative'],reminder:['Fast before next bloods','Clinic visit next week']},
+    pharmacist:{instruction:['Hold MMF today','Take tac 1 h earlier'],recommendation:['Switch to once-daily tac','Add refill reminders'],result:['Tac trough 9.1 ng/mL','WBC recovered'],reminder:['Avoid grapefruit','Bring medicines to clinic']},
+    coordinator:{instruction:['Come to admissions now','Bring ID & medicine list'],recommendation:['Arrange transport','Confirm caregiver'],result:['Cardiology cleared','Committee approved'],reminder:['Keep phone reachable','Dialysis as scheduled']}
+  };
+  const list=(byRole[state.role]||byRole.physician)[ciType]||[];
+  w.innerHTML=list.map(t=>'<span class="chip" onclick="document.getElementById(\'ci_title\').value=this.textContent">'+t+'</span>').join('');
+}
+function pushItem(){
+  const title=document.getElementById('ci_title').value.trim(); const text=document.getElementById('ci_text').value.trim();
+  if(!title){toast('Add a title');return;}
+  state.careItems.push({id:'ci'+Date.now(),type:ciType,title,text:text||'(no additional detail)',role:state.role,author:roleName[state.role],date:dateShort(),ack:false});
+  save(); document.getElementById('ci_title').value=''; document.getElementById('ci_text').value='';
+  renderConsole(); renderToday(); toast('Sent to patient');
+}
+function quickPush(type,title,text){ state.careItems.push({id:'ci'+Date.now(),type,title,text,role:state.role,author:roleName[state.role],date:dateShort(),ack:false}); save(); renderConsole(); renderToday(); toast('Sent to patient'); }
+
+/* journey mutations */
+function cycleClr(id){const order=['pending','scheduled','in_progress','cleared'];const c=state.clearances.find(x=>x.id===id);if(!c)return;if(c.status==='action'){c.status='in_progress';}else{c.status=order[(order.indexOf(c.status)+1)%order.length];}c.date=dateShort();save();renderConsole();renderJourney();toast(c.dept+' → '+c.status.replace('_',' '));}
+function activateList(){ state.clearances.forEach(c=>c.status='cleared'); state.waitlist={active:true,band:'Standard',accruedMonths:0,status:'Active',matchScore:'—'}; setPhase('listed'); pushSys('coordinator','result','Listed on the Dubai Health waiting list','All clearances complete and the transplant committee approved you. You are now active and being considered for every matching kidney.'); toast('Patient listed'); }
+function triggerOffer(){ state.offer={stage:0,donorType:'Deceased donor (DBD)',dgf:false}; setPhase('offer'); pushSys('coordinator','instruction','You’ve been selected for a kidney offer','A matching kidney is available and the team selected you. Please come to admissions now and do not eat or drink. Follow each step in the app.'); toast('Offer sent to patient'); }
+function advanceOffer(){ if(state.offer.stage<OFFER_STEPS.length-1){ state.offer.stage++; const s=OFFER_STEPS[state.offer.stage]; pushSys('coordinator','reminder',s[0],s[1]); if(state.offer.stage===OFFER_STEPS.length-1){ state.offer.dgf=(state.offer.donorType.indexOf('DBD')>=0||state.offer.donorType.indexOf('DCD')>=0); } save(); renderConsole(); renderJourney(); toast('Step: '+s[0]); } else { setPhase('periop'); } }
+function toggleDGF(){ state.offer.dgf=!state.offer.dgf; save(); renderConsole(); renderJourney(); toast('DGF '+(state.offer.dgf?'on':'off')); }
+function setPhase(p){ state.phase=p; if(p==='post'){ seedPostData(); pushSys('physician','recommendation','Welcome to post-transplant care','Your transplant is done. Take your anti-rejection medicines exactly on time, attend every lab, and message us anytime. Detailed plan is in Health.'); } save(); renderAll(); if(currentScreen==='journey')renderJourney(); toast('Phase: '+p); }
+function seedPostData(){ if(!state.followups.length){ state.followups=[{t:'Transplant clinic',d:'in 1 week · Dr. review + labs'},{t:'Lab — tacrolimus trough',d:'in 3 days'},{t:'BK & CMV PCR',d:'in 2 weeks'}]; state.investigations=[{t:'Creatinine / eGFR',d:'weekly → monthly'},{t:'Tacrolimus trough',d:'target 8–11 → 5–8 ng/mL'},{t:'Urine protein',d:'monthly'}]; } }
+function pushSys(role,type,title,text){ state.careItems.push({id:'ci'+Date.now()+Math.random(),type,title,text,role,author:roleName[role],date:dateShort(),ack:false}); }
+
+/* ===== MESSAGES (4-party) ===== */
+let channel='all';
+function renderMessages(){
+  const cb=document.getElementById('chanBar'); if(cb){
+    const chans=state.role==='patient'?[['all','Care team'],['physician','🩺 Physician'],['pharmacist','💊 Pharmacist'],['coordinator','📋 Coordinator']]:[['all','All'],['patient','🧑 Patient']];
+    cb.innerHTML=chans.map(([id,l])=>'<button class="'+(channel===id?'on':'')+'" onclick="setChannel(\''+id+'\')">'+l+'</button>').join('');
+  }
+  const w=document.getElementById('msgWrap'); if(!w)return; w.innerHTML='';
+  const msgs=state.messages.filter(m=>visibleMsg(m));
+  if(!msgs.length){ w.innerHTML='<div class="empty"><div class="big">💬</div>No messages in this channel yet.</div>'; return; }
+  msgs.forEach(m=>{
+    const mine=m.role===state.role;
+    const el=document.createElement('div'); el.className='bubble '+(mine?'me':'them r-'+m.role);
+    el.innerHTML=(mine?'':'<div class="who">'+roleIcon[m.role]+' '+roleName[m.role].replace(' (Physician)','')+'</div>')+esc(m.text)+'<div class="tm">'+m.ts+'</div>';
+    w.appendChild(el);
+  });
+  setTimeout(()=>w.scrollTop=w.scrollHeight,30);
+}
+function visibleMsg(m){
+  // staff see messages with patient; patient filters by channel
+  if(state.role==='patient'){ return channel==='all' || m.role==='patient' || m.role===channel; }
+  return true;
+}
+function setChannel(c){channel=c;renderMessages();}
+function sendMsg(){
+  const inp=document.getElementById('msgInput'); const t=inp.value.trim(); if(!t)return;
+  const to=(state.role==='patient'&&channel!=='all')?channel:null;
+  state.messages.push({role:state.role,text:t,to,ts:nowTime(),_seen:true});
+  inp.value=''; save(); renderMessages(); renderNav();
+  if(state.role==='patient'){
+    const responder=to||'coordinator';
+    setTimeout(()=>{ state.messages.push({role:responder,text:autoReply(responder),ts:nowTime()}); save(); if(currentScreen==='messages')renderMessages(); renderNav(); },1300);
+  }
+}
+function autoReply(r){
+  return {physician:'Thanks — noted by the transplant physician. We’ll review and reply. For urgent symptoms (fever, low urine, chest pain) call the transplant line now.',
+    pharmacist:'Clinical pharmacist here — got it. I’ll check your medicines and levels and get back to you. Don’t start anything new until we confirm.',
+    coordinator:'Coordinator here — received. I’ll sort the logistics and update you. Keep your phone reachable.'}[r];
+}
+
+/* ===== DRUG INTERACTION CHECKER ===== */
+/* Screened against the transplant immunosuppression backbone (tacrolimus/CNI, MMF, mTOR, azathioprine). Educational — not a substitute for a full pharmacy review. */
+const IX_DB=[
+  {names:['ketoconazole','itraconazole','voriconazole','posaconazole','fluconazole','antifungal'],sev:'major',with:'Tacrolimus / ciclosporin (CNI)',mech:'Strong CYP3A4 inhibition raises CNI blood levels, risking nephrotoxicity, neurotoxicity and hyperkalaemia.',mgmt:'Avoid if possible. If essential, pre-emptively cut the tacrolimus dose (often by ~half or more for strong azoles) and check troughs within 2–3 days.',pt:'This antifungal can push your anti-rejection medicine to dangerous levels. Don’t start it without the transplant team adjusting your dose.'},
+  {names:['clarithromycin','erythromycin','macrolide'],sev:'major',with:'Tacrolimus / ciclosporin (CNI)',mech:'CYP3A4 inhibition raises CNI levels.',mgmt:'Use azithromycin instead (minimal interaction). If a macrolide is unavoidable, reduce CNI dose and monitor troughs.',pt:'This antibiotic can raise your anti-rejection level. Ask for azithromycin instead, or let the team adjust your dose.'},
+  {names:['diltiazem','verapamil'],sev:'moderate',with:'Tacrolimus / ciclosporin (CNI)',mech:'CYP3A4 inhibition raises CNI levels — sometimes used deliberately as a “CNI-sparing” strategy.',mgmt:'Anticipate higher troughs; reduce CNI dose and monitor. Amlodipine is a lower-interaction alternative.',pt:'This blood-pressure medicine raises your anti-rejection level. The team may lower your dose — don’t change anything yourself.'},
+  {names:['grapefruit','seville orange','pomelo'],sev:'major',with:'Tacrolimus / ciclosporin / sirolimus',mech:'Inhibits intestinal CYP3A4, unpredictably raising drug levels.',mgmt:'Avoid grapefruit and grapefruit juice entirely.',pt:'Avoid grapefruit and its juice completely — it makes your anti-rejection level jump unpredictably.'},
+  {names:['rifampicin','rifampin','rifabutin'],sev:'major',with:'Tacrolimus / ciclosporin / sirolimus',mech:'Potent CYP3A4 induction sharply lowers drug levels — rejection risk.',mgmt:'Avoid if possible. If required, expect to increase CNI dose substantially with close trough monitoring.',pt:'This TB antibiotic can drop your anti-rejection level and risk rejection. The team must manage it carefully.'},
+  {names:['phenytoin','carbamazepine','phenobarbital','phenobarbitone'],sev:'major',with:'Tacrolimus / ciclosporin',mech:'CYP3A4 induction lowers CNI levels.',mgmt:'Prefer non-inducing anticonvulsants (e.g. levetiracetam). If used, increase CNI dose and monitor.',pt:'This seizure medicine can lower your anti-rejection level. Tell the team so they can adjust or switch it.'},
+  {names:['st john','hypericum','herbal','supplement'],sev:'major',with:'Tacrolimus / ciclosporin / sirolimus',mech:'St John’s Wort induces CYP3A4/P-gp, lowering drug levels and risking rejection. Many herbals are unpredictable.',mgmt:'Avoid St John’s Wort and unverified herbal products entirely. Check every supplement with pharmacy first.',pt:'Avoid St John’s Wort and any herbal product unless the transplant pharmacist clears it — they can cause rejection.'},
+  {names:['simvastatin','atorvastatin','statin'],sev:'moderate',with:'Tacrolimus / ciclosporin',mech:'CNIs raise statin levels, increasing myopathy and rhabdomyolysis risk (greatest with simvastatin).',mgmt:'Use low-dose pravastatin or fluvastatin; cap simvastatin/atorvastatin dose. Counsel on muscle pain.',pt:'Your cholesterol medicine can build up and cause muscle damage. Report muscle pain; the team may switch you to a safer statin.'},
+  {names:['ibuprofen','naproxen','diclofenac','nsaid','indomethacin','celecoxib'],sev:'major',with:'Tacrolimus / ciclosporin',mech:'Additive nephrotoxicity and hyperkalaemia; reduced renal perfusion.',mgmt:'Avoid NSAIDs. Use paracetamol for pain. If unavoidable, short course with renal monitoring.',pt:'Avoid anti-inflammatory painkillers (ibuprofen, etc.) — they can harm your kidney. Use paracetamol instead.'},
+  {names:['trimethoprim','co-trimoxazole','cotrimoxazole','septrin','bactrim','sulfamethoxazole'],sev:'moderate',with:'Tacrolimus / CNI',mech:'Additive hyperkalaemia and a (usually benign) rise in creatinine; this is also your PJP prophylaxis.',mgmt:'Continue as prophylaxis but monitor potassium and creatinine; renally dose.',pt:'This is part of your protective medicines. It can nudge your potassium up — the team monitors your bloods.'},
+  {names:['lisinopril','ramipril','enalapril','losartan','valsartan','ace inhibitor','arb'],sev:'moderate',with:'Tacrolimus / CNI',mech:'Additive hyperkalaemia; may raise creatinine. Often used intentionally for proteinuria/BP.',mgmt:'Monitor potassium and renal function after starting or up-titrating.',pt:'This blood-pressure/kidney-protecting medicine can raise potassium with your other drugs — the team checks your bloods.'},
+  {names:['allopurinol','febuxostat'],sev:'contra',with:'Azathioprine',mech:'Blocks xanthine oxidase, causing azathioprine accumulation and severe bone-marrow suppression.',mgmt:'Avoid together. If on azathioprine, do not start allopurinol (or reduce azathioprine to ~25% with intensive monitoring). Prefer alternatives for gout.',pt:'If you take azathioprine, this gout medicine can be dangerous for your blood counts. Never combine without the team.'},
+  {names:['omeprazole','pantoprazole','esomeprazole','lansoprazole','antacid','ppi','proton pump'],sev:'minor',with:'Mycophenolate (MMF)',mech:'PPIs/antacids can reduce MMF absorption; magnesium/aluminium antacids chelate it.',mgmt:'Separate antacids from MMF by 2 hours; be aware MPA exposure may fall.',pt:'Acid/antacid medicines can slightly weaken one of your transplant medicines. Space them apart and tell pharmacy.'},
+  {names:['cholestyramine','colestyramine'],sev:'moderate',with:'Mycophenolate (MMF)',mech:'Interrupts enterohepatic recirculation, lowering MMF exposure.',mgmt:'Avoid co-administration; if needed, separate dosing and monitor for under-immunosuppression.',pt:'This medicine can weaken one of your transplant drugs — the team will space or change it.'},
+  {names:['gentamicin','amikacin','tobramycin','aminoglycoside','amphotericin','vancomycin'],sev:'major',with:'Tacrolimus / CNI',mech:'Additive nephrotoxicity.',mgmt:'Use with caution; monitor renal function and drug levels; consider less nephrotoxic alternatives.',pt:'This strong antibiotic/antifungal can add stress to your kidney alongside your anti-rejection medicine — the team monitors closely.'},
+  {names:['amiodarone'],sev:'moderate',with:'Tacrolimus / CNI',mech:'CYP3A4 inhibition raises CNI levels; additive QT prolongation.',mgmt:'Monitor troughs and ECG; reduce CNI dose as needed.',pt:'This heart-rhythm medicine raises your anti-rejection level — the team will adjust and monitor.'},
+  {names:['live vaccine','mmr','varicella','yellow fever','bcg','nasal flu','rotavirus','zoster live'],sev:'contra',with:'All immunosuppression',mech:'Live vaccines can cause disseminated infection in immunosuppressed recipients.',mgmt:'Contraindicated after transplant. Give live vaccines ≥4 weeks before transplant. Inactivated vaccines are fine afterwards.',pt:'“Live” vaccines aren’t safe after transplant. Get them done before, and stick to inactivated vaccines afterwards.'},
+  {names:['nifedipine','amlodipine'],sev:'minor',with:'Tacrolimus / CNI',mech:'Minimal CYP3A effect — a preferred calcium-channel blocker in transplant.',mgmt:'Generally safe; routine monitoring.',pt:'This is usually a safe blood-pressure choice with your transplant medicines.'},
+  {names:['metoclopramide'],sev:'minor',with:'Tacrolimus',mech:'May increase tacrolimus absorption by speeding gastric emptying.',mgmt:'Monitor troughs if used regularly.',pt:'Usually fine short-term; the team monitors if used often.'}
+];
+function checkIx(qraw){
+  const q=qraw.trim().toLowerCase(); if(q.length<2) return null;
+  let best=null;
+  for(const e of IX_DB){ for(const n of e.names){ if(n===q || n.startsWith(q) || q.startsWith(n)){ if(!best) best=e; break; } } }
+  return best || {sev:'none'};
+}
+const SEVLABEL={contra:'⛔ Contraindicated',major:'🔴 Major',moderate:'🟠 Moderate',minor:'🟢 Minor',none:'No match found'};
+function runIxCheck(sfx){
+  sfx=sfx||'';
+  const el=document.getElementById('ixResult'+sfx); if(!el) return;
+  const v=document.getElementById('ixInput'+sfx).value;
+  if(v.trim().length<2){ el.innerHTML=''; return; }
+  const r=checkIx(v);
+  if(r.sev==='none'){
+    el.innerHTML='<div class="ix-res sev-none"><span class="sb">No match found</span><div class="dn">“'+esc(v)+'”</div><div class="row">Not in this quick-check list. Always confirm any new medicine, herbal or supplement with the transplant pharmacist before starting it.</div></div>';
+    return;
+  }
+  const staff=isStaff();
+  let body = staff
+    ? '<div class="row"><b>Interacts with:</b> '+r.with+'</div><div class="row"><b>Mechanism:</b> '+r.mech+'</div><div class="row"><b>Management:</b> '+r.mgmt+'</div>'
+    : '<div class="row">'+r.pt+'</div>';
+  el.innerHTML='<div class="ix-res sev-'+r.sev+'"><span class="sb">'+SEVLABEL[r.sev]+'</span><div class="dn">'+esc(v)+' &nbsp;✕&nbsp; '+(r.with||'transplant medicines')+'</div>'+body+'</div>';
+}
+function ixPick(name,sfx){ sfx=sfx||''; const i=document.getElementById('ixInput'+sfx); if(i){ i.value=name; runIxCheck(sfx); } }
+function ixCheckerHTML(sfx){
+  sfx=sfx||'';
+  const staff=isStaff();
+  const quick=['Fluconazole','Clarithromycin','Diltiazem','Grapefruit','Ibuprofen','Simvastatin','Rifampicin','St John’s Wort','Allopurinol','Live vaccine'];
+  return '<div class="card"><h3>💊 Drug interaction checker</h3>'+
+    '<div class="hint" style="margin:0 0 9px">'+(staff?'Screen any drug against this patient’s immunosuppression (tacrolimus/CNI, MMF, mTOR, azathioprine).':'Check if something is safe with your transplant medicines. When in doubt, always ask your pharmacist.')+'</div>'+
+    '<div class="ix-search"><input type="text" id="ixInput'+sfx+'" placeholder="Type a drug, herbal or food…" oninput="runIxCheck(\''+sfx+'\')"></div>'+
+    '<div class="ix-quick">'+quick.map(q=>'<span class="chip" onclick="ixPick(\''+q.replace(/'/g,"\\'")+'\',\''+sfx+'\')">'+q+'</span>').join('')+'</div>'+
+    '<div id="ixResult'+sfx+'"></div>'+
+    '<p class="footer-note" style="text-align:left;margin-top:10px">Educational quick-check covering the most important transplant interactions — not a full pharmacy review. In production this screens the live SALAMA medication list automatically.</p></div>';
+}
+
+/* warn the clinician if they prescribe/recommend an interacting drug */
+function findIxInText(text){
+  const t=String(text).toLowerCase(); let hit=null;
+  for(const e of IX_DB){ if(e.sev==='minor') continue; for(const n of e.names){ if(n.length>=5 && t.includes(n)){ if(!hit) hit=e; break; } } if(hit) break; }
+  return hit;
+}
+function checkComposerIx(){
+  const w=document.getElementById('ciWarn'); if(!w) return;
+  const ti=document.getElementById('ci_title'), tx=document.getElementById('ci_text');
+  const hit=findIxInText((ti?ti.value:'')+' '+(tx?tx.value:''));
+  if(!hit){ w.innerHTML=''; return; }
+  w.innerHTML='<div class="ix-alert sev-'+hit.sev+'" style="margin-top:10px"><span style="font-size:16px">⚠️</span><div><div class="an">Interaction warning — '+hit.sev+' with '+hit.with+'</div><div class="ad">'+esc(hit.mech+' '+hit.mgmt)+'</div></div></div>';
+}
+/* patient daily dose reminder */
+function medReminderHTML(){
+  if(!state.medTaken) state.medTaken={};
+  const post=['periop','post'].includes(state.phase);
+  const meds=medList(post); const now=curMin(); let overdue=0, next=null;
+  meds.forEach(m=>m.times.forEach(t=>{ if(t==='—')return; const taken=!!state.medTaken[doseKey(t,m.n)]; const tm=hm(t);
+    if(!taken){ if(now>tm+30) overdue++; else if(!next||tm<next.tm) next={tm,t,n:m.n}; } }));
+  if(!overdue && !next) return '';
+  let h='<div class="card" style="border-left:4px solid var(--rx)"><h3 style="font-size:13.5px">💊 Medication reminders</h3>';
+  if(overdue) h+='<div style="font-size:12px;color:var(--rose);font-weight:700;margin-bottom:4px">⏰ '+overdue+' dose'+(overdue>1?'s':'')+' overdue — take now and tick them off in Health.</div>';
+  if(next) h+='<div style="font-size:12px;color:#37474f">Next dose: <b>'+next.n+'</b> at <b>'+next.t+'</b>.</div>';
+  h+='<button class="btn ghost sm" onclick="go(\'meds\')">Open medication schedule</button></div>';
+  return h;
+}
+
+/* ===== MISC ===== */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2000);}
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='flex';});
+function installApp(){ if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;document.getElementById('installBtn').style.display='none';} else toast('Use your browser’s "Add to Home Screen"'); }
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+
+/* ===== INIT ===== */
+function init(){
+  loadState(); if(!state){ state=fresh(); } if(state&&!state.medTaken) state.medTaken={};
+  if(state.role){ showApp(); document.querySelectorAll('.role').forEach(b=>b.classList.toggle('active',b.dataset.role===state.role)); document.getElementById('hdrSub').textContent={patient:'Dubai Health · my journey',physician:'Transplant physician · SALAMA',pharmacist:'Clinical pharmacist · SALAMA',coordinator:'Transplant coordinator · SALAMA'}[state.role]; renderAll(); renderNav(); go(state.role==='patient'?'journey':'console'); }
+  else { go('login'); }
+}
+init();
+</script>
+</body>
+</html>
