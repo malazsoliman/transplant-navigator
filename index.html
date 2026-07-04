@@ -47,7 +47,7 @@
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
   /* login */
-  #login{padding:0}
+  #login,#pickpt{padding:0}
   .login-hero{background:linear-gradient(150deg,var(--teal),var(--teal-d));color:#fff;padding:46px 24px 30px;text-align:center}
   .login-hero .lg{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:34px;margin:0 auto 14px}
   .login-hero h2{margin:0 0 6px;font-size:22px}
@@ -266,7 +266,7 @@
       <div class="login-body">
         <h3>Sign in to your role</h3>
         <p class="hint">Patients sign in through <b>MyChart / the Dubai Health app</b>; clinicians through SALAMA. All data is pulled automatically from SALAMA — no manual entry.</p>
-        <button class="role-pick" onclick="login('patient')"><span class="av" style="background:var(--pt)">🧑</span><span><span class="t">Patient</span><br><span class="s">Via MyChart / Dubai Health app — journey, results & meds</span></span><span class="arrow">›</span></button>
+        <button class="role-pick" onclick="openPicker()"><span class="av" style="background:var(--pt)">🧑</span><span><span class="t">Patient</span><br><span class="s">Via MyChart / Dubai Health app — journey, results & meds</span></span><span class="arrow">›</span></button>
         <button class="role-pick" onclick="login('physician')"><span class="av" style="background:var(--md)">🩺</span><span><span class="t">Transplant physician</span><br><span class="s">Clinical decisions, instructions, journey control</span></span><span class="arrow">›</span></button>
         <button class="role-pick" onclick="login('pharmacist')"><span class="av" style="background:var(--rx)">💊</span><span><span class="t">Clinical pharmacist</span><br><span class="s">Medications, levels, interactions, counseling</span></span><span class="arrow">›</span></button>
         <button class="role-pick" onclick="login('coordinator')"><span class="av" style="background:var(--co)">📋</span><span><span class="t">Transplant coordinator</span><br><span class="s">Clearances, waitlist, offers, logistics</span></span><span class="arrow">›</span></button>
@@ -276,6 +276,15 @@
         <p style="text-align:center;margin:14px 0 0"><button onclick="resetDemo()" style="background:none;border:none;color:#9bb0b0;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline">↺ Reset demo data</button></p>
         <p class="footer-note">Educational prototype for Dubai Health. Connects only to SALAMA (Epic); patients reach the same record through MyChart / the Dubai Health app. Sync and cross-platform sign-in are simulated. Not a substitute for the transplant team's orders.</p>
       </div>
+    </section>
+
+    <!-- DEMO PATIENT PICKER -->
+    <section class="screen" id="pickpt">
+      <div class="login-hero" style="padding:32px 24px 22px">
+        <h2 style="margin:0 0 5px;font-size:19px">Choose a demo patient</h2>
+        <p>Each patient is at a different point of the transplant journey</p>
+      </div>
+      <div class="login-body" id="ptList"></div>
     </section>
 
     <!-- JOURNEY (phase hub) -->
@@ -326,7 +335,7 @@
 
 <script>
 /* ===== STATE ===== */
-const KEY='tnav_v3';
+const KEY='tnav_v4';
 const PHASES=['clearance','listed','offer','periop','post'];
 const PHASE_META={
   clearance:{i:0,title:'Pre-transplant evaluation',sub:'Completing clearances from every department'},
@@ -335,16 +344,34 @@ const PHASE_META={
   periop:{i:3,title:'Surgery & early recovery',sub:'Transplant and the critical first days'},
   post:{i:4,title:'Post-transplant care',sub:'Protecting your new kidney for the long term'}
 };
-let state=null;
-function fresh(){return {
-  role:null, phase:'clearance', syncedAt:nowShort(),
-  patient:{name:'Ahmed K.', eid:'784-1982-3456789-1', mrn:'SAL-204517', blood:'O+', age:46, cause:'Diabetic nephropathy', dialysis:'Haemodialysis ×3/week (18 months)'},
-  clearances:seedClearances(),
-  waitlist:{active:false, band:'—', accruedMonths:0, status:'Not yet listed', matchScore:'—'},
-  offer:{stage:-1, donorType:'Deceased donor (DBD)', dgf:false},
-  meds:[], followups:[], investigations:[],
-  careItems:[], messages:[], done:{}, medTaken:{}
-};}
+let state=null, store=null;
+/* ===== DEMO ROSTER ===== */
+const DEMOS=[
+  {id:'p1',name:'Ahmed K.',age:46,blood:'O+',eid:'784-1980-3456789-1',mrn:'SAL-204517',cause:'Diabetic nephropathy',dialysis:'Haemodialysis ×3/week (18 months)',phase:'clearance'},
+  {id:'p2',name:'Fatima R.',age:38,blood:'B+',eid:'784-1988-1123456-2',mrn:'SAL-198332',cause:'IgA nephropathy',dialysis:'Peritoneal dialysis (24 months)',phase:'listed',wl:{band:'Standard',accruedMonths:14}},
+  {id:'p3',name:'Yousef M.',age:52,blood:'A+',eid:'784-1974-2234567-3',mrn:'SAL-176554',cause:'Hypertensive nephrosclerosis',dialysis:'Haemodialysis ×3/week (36 months)',phase:'offer',wl:{band:'Standard',accruedMonths:28},offer:{stage:2,donorType:'Deceased donor (DBD)',dgf:false}},
+  {id:'p4',name:'Layla H.',age:29,blood:'AB+',eid:'784-1997-3345678-4',mrn:'SAL-221708',cause:'Lupus nephritis',dialysis:'Pre-emptive — no dialysis',phase:'periop',offer:{stage:6,donorType:'Living donor (related)',dgf:false}},
+  {id:'p5',name:'Khalid A.',age:58,blood:'O-',eid:'784-1968-4456789-5',mrn:'SAL-163290',cause:'Diabetic nephropathy',dialysis:'Haemodialysis ×3/week (48 months)',phase:'periop',offer:{stage:6,donorType:'Deceased donor (DCD)',dgf:true}},
+  {id:'p6',name:'Omar S.',age:61,blood:'A-',eid:'784-1965-5567890-6',mrn:'SAL-140217',cause:'Polycystic kidney disease (ADPKD)',dialysis:'Transplanted 8 months ago',phase:'post',offer:{stage:6,donorType:'Deceased donor (DBD)',dgf:false}}
+];
+const STAGE_LBL={clearance:'Evaluation',listed:'Waitlisted',offer:'Kidney offer',periop:'Surgery & recovery',post:'Post-transplant'};
+const STAGE_COL={clearance:'var(--amber)',listed:'var(--sky)',offer:'var(--rose)',periop:'var(--purple)',post:'var(--green)'};
+function freshPatient(cfg){
+  const later=PHASES.indexOf(cfg.phase)>0;
+  const cl=seedClearances(); if(later) cl.forEach(c=>c.status='cleared');
+  const wlActive=['listed','offer'].includes(cfg.phase);
+  return {
+    role:null, phase:cfg.phase, syncedAt:nowShort(),
+    patient:{name:cfg.name, eid:cfg.eid, mrn:cfg.mrn, blood:cfg.blood, age:cfg.age, cause:cfg.cause, dialysis:cfg.dialysis},
+    clearances:cl,
+    waitlist: later ? {active:wlActive, band:(cfg.wl&&cfg.wl.band)||'Standard', accruedMonths:(cfg.wl&&cfg.wl.accruedMonths)||0, status:wlActive?'Active':'Transplanted', matchScore:'—'}
+                    : {active:false, band:'—', accruedMonths:0, status:'Not yet listed', matchScore:'—'},
+    offer: cfg.offer?Object.assign({},cfg.offer):{stage:-1, donorType:'Deceased donor (DBD)', dgf:false},
+    meds:[], followups:[], investigations:[],
+    careItems:[], messages:[], done:{}, medTaken:{}
+  };
+}
+function freshStore(){ const s={role:null,cur:'p1',patients:{}}; DEMOS.forEach(d=>s.patients[d.id]=freshPatient(d)); return s; }
 function seedClearances(){
   const M=(dept,ic,detail,status,owner)=>({id:'c'+Math.random().toString(36).slice(2,7),dept,cat:'medical',ic,detail,status,owner,date:''});
   const N=(dept,ic,detail,status,owner)=>({...M(dept,ic,detail,status,owner),cat:'nonmedical'});
@@ -364,19 +391,29 @@ function seedClearances(){
     N('Transplant committee approval','✅','Final multidisciplinary listing decision','pending','Tx committee')
   ];
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
-function loadState(){try{const s=localStorage.getItem(KEY);if(s)state=JSON.parse(s)}catch(e){}}
+function save(){ if(store&&state){store.patients[store.cur]=state; store.role=state.role;} try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){} }
+function loadState(){ try{const s=localStorage.getItem(KEY); if(s){store=JSON.parse(s); state=store.patients&&store.patients[store.cur];} }catch(e){store=null;state=null;} }
+function setPatient(id){ if(!store.patients[id])return; save(); store.cur=id; state=store.patients[id]; state.role=store.role; save(); renderAll(); renderNav(); toast('Patient: '+state.patient.name); }
+function openPicker(){ renderPicker(); go('pickpt'); }
+function renderPicker(){
+  const el=document.getElementById('ptList'); if(!el)return;
+  el.innerHTML='<h3>Demo patients</h3><p class="hint">Pick a patient to sign in as — each shows a different stage of the app.</p>'+
+    DEMOS.map(d=>'<button class="role-pick" onclick="pickPatient(\''+d.id+'\')"><span class="av" style="background:'+STAGE_COL[d.phase]+'">🧑</span><span><span class="t">'+d.name+' · '+d.age+'</span><br><span class="s">'+d.cause+'</span><br><span class="s" style="font-weight:700;color:var(--teal)">'+STAGE_LBL[d.phase]+'</span></span><span class="arrow">›</span></button>').join('')+
+    '<p style="text-align:center;margin:12px 0 0"><button onclick="go(\'login\')" style="background:none;border:none;color:#9bb0b0;font-size:12px;font-weight:600;cursor:pointer">‹ Back</button></p>';
+}
+function pickPatient(id){ store.cur=id; state=store.patients[id]; login('patient'); }
 function nowShort(){return new Date().toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
 function nowTime(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
 function dateShort(){return new Date().toLocaleDateString([],{month:'short',day:'numeric'})}
 const isStaff=()=>['physician','pharmacist','coordinator'].includes(state.role);
-const roleName={patient:'Patient',physician:'Dr. (Physician)',pharmacist:'Clinical Pharmacist',coordinator:'Coordinator'};
+const roleName={patient:'Patient',physician:'Dr. Mariam Al-Suwaidi (Physician)',pharmacist:'Rana Haddad · Clinical pharmacist',coordinator:'Salem Al-Marri · Coordinator'};
+const HDRSUB={patient:'Dubai Health · my journey',physician:'Dr. Mariam Al-Suwaidi · SALAMA',pharmacist:'Rana Haddad · Clinical pharmacist · SALAMA',coordinator:'Salem Al-Marri · Coordinator · SALAMA'};
 const roleIcon={patient:'🧑',physician:'🩺',pharmacist:'💊',coordinator:'📋'};
 
 /* ===== AUTH / NAV ===== */
-function login(r){ if(!state) state=fresh(); state.role=r; save(); showApp(); setRole(r); }
+function login(r){ state.role=r; store.role=r; save(); showApp(); setRole(r); }
 function resetDemo(){ try{localStorage.removeItem(KEY)}catch(e){} location.reload(); }
-function logout(){ state.role=null; save(); document.getElementById('hdr').style.display='none'; document.getElementById('nav').style.display='none'; go('login'); }
+function logout(){ state.role=null; store.role=null; save(); document.getElementById('hdr').style.display='none'; document.getElementById('nav').style.display='none'; go('login'); }
 function showApp(){ document.getElementById('hdr').style.display='block'; document.getElementById('nav').style.display='flex'; }
 
 const NAVS={
@@ -405,9 +442,9 @@ function go(id){
   window.scrollTo(0,0);
 }
 function setRole(r){
-  state.role=r; save();
+  state.role=r; store.role=r; save();
   document.querySelectorAll('.role').forEach(b=>b.classList.toggle('active',b.dataset.role===r));
-  document.getElementById('hdrSub').textContent={patient:'Dubai Health · my journey',physician:'Transplant physician · SALAMA',pharmacist:'Clinical pharmacist · SALAMA',coordinator:'Transplant coordinator · SALAMA'}[r];
+  document.getElementById('hdrSub').textContent=HDRSUB[r];
   renderAll(); renderNav();
   go(state.role==='patient'?'journey':'console');
 }
@@ -655,6 +692,9 @@ function renderConsole(){
     '<div class="hint" style="margin:0 0 4px">SALAMA-linked · '+state.patient.name+' · MRN '+state.patient.mrn+'</div>'+
     '<div class="pill-list"><span>'+state.patient.blood+'</span><span>'+state.patient.cause+'</span><span>'+state.patient.dialysis+'</span></div></div>';
 
+  // demo patient switcher
+  h+='<div class="card"><h3 style="font-size:13.5px">🧑‍🤝‍🧑 Demo patients</h3><div class="hint" style="margin:0 0 8px">Switch the active patient — each is at a different journey stage.</div><div class="chips">'+DEMOS.map(d=>'<span class="chip" onclick="setPatient(\''+d.id+'\')" style="'+(store.cur===d.id?'background:var(--teal);color:#fff;border-color:var(--teal)':'')+'">'+d.name+' · '+STAGE_LBL[d.phase]+'</span>').join('')+'</div></div>';
+
   // composer
   h+='<div class="card"><h3 style="font-size:13.5px">Send to patient journey</h3>'+
     '<div class="seg" id="ciSeg">'+
@@ -770,9 +810,9 @@ function sendMsg(){
   }
 }
 function autoReply(r){
-  return {physician:'Thanks — noted by the transplant physician. We’ll review and reply. For urgent symptoms (fever, low urine, chest pain) call the transplant line now.',
-    pharmacist:'Clinical pharmacist here — got it. I’ll check your medicines and levels and get back to you. Don’t start anything new until we confirm.',
-    coordinator:'Coordinator here — received. I’ll sort the logistics and update you. Keep your phone reachable.'}[r];
+  return {physician:'Dr. Mariam Al-Suwaidi here — noted. We’ll review and reply. For urgent symptoms (fever, low urine, chest pain) call the transplant line now.',
+    pharmacist:'Rana Haddad (clinical pharmacist) here — got it. I’ll check your medicines and levels and get back to you. Don’t start anything new until we confirm.',
+    coordinator:'Salem Al-Marri (coordinator) here — received. I’ll sort the logistics and update you. Keep your phone reachable.'}[r];
 }
 
 /* ===== DRUG INTERACTION CHECKER ===== */
@@ -872,8 +912,12 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
 
 /* ===== INIT ===== */
 function init(){
-  loadState(); if(!state){ state=fresh(); } if(state&&!state.medTaken) state.medTaken={};
-  if(state.role){ showApp(); document.querySelectorAll('.role').forEach(b=>b.classList.toggle('active',b.dataset.role===state.role)); document.getElementById('hdrSub').textContent={patient:'Dubai Health · my journey',physician:'Transplant physician · SALAMA',pharmacist:'Clinical pharmacist · SALAMA',coordinator:'Transplant coordinator · SALAMA'}[state.role]; renderAll(); renderNav(); go(state.role==='patient'?'journey':'console'); }
+  loadState();
+  if(!store||!store.patients){ store=freshStore(); }
+  if(!store.patients[store.cur]) store.cur='p1';
+  state=store.patients[store.cur];
+  if(!state.medTaken) state.medTaken={};
+  if(store.role){ state.role=store.role; showApp(); document.querySelectorAll('.role').forEach(b=>b.classList.toggle('active',b.dataset.role===state.role)); document.getElementById('hdrSub').textContent=HDRSUB[state.role]; renderAll(); renderNav(); go(state.role==='patient'?'journey':'console'); }
   else { go('login'); }
 }
 init();
